@@ -27,7 +27,7 @@ jobs:
 
       - name: Upload data to S3
         env: 
-          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}   
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_KEY }}
+          access_key: ${{ secrets.ACCESS_KEY }}   
+          secret_key: ${{ secrets.SECRET_KEY }}
           AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
         run: python s3_upload_api.py  
