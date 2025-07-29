@@ -1,8 +1,8 @@
 name: Bike-point-extract
 
 on: 
-  schedule:
-    - cron: '0 * * * *'  # Runs at the start of every hour (UTC)
+  # schedule:
+  #   - cron: '0 * * * *'  # Runs at the start of every hour (UTC)
   workflow_dispatch:
 
 jobs:
