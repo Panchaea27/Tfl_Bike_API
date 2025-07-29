@@ -1,0 +1,38 @@
+# This is a basic script that extracts the  bike point data using output_json_api.py script
+
+name: Bike-point-extract
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or every hour (schedules w/ cron).
+on: 
+  schedule:
+      - cron: '0 * * * *' 
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: Bike Point Environment
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
+
+      - name: python env set up
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: install packages
+        run: pip install -r requirements.txt
+
+      - name: run extract script
+        run: output_json_api.py
+
+      - name: upload data to s3
+        env: 
+          access_key: ${{secrets.ACCESS_KEY}}
+          secret_key: ${{secrets.SECRET_KEY}}
+          AWS_BUCKET_NAME: ${{secrets.AWS_BUCKET_NAME}}
+        run: s3_upload_api.py
+    
