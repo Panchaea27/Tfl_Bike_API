@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 import time
 import requests
+import os
 
 
 bikeurl = 'https://api.tfl.gov.uk/BikePoint'
@@ -14,6 +15,7 @@ errorvar = ''
 now = datetime.now()
 while current_try<max_tries:
     try:
+        os.makedirs('data', exist_ok=True)
         response.raise_for_status() #method checks if reposne returns an error status. will fail try block if so
         try:
             data = response.json()
@@ -28,10 +30,14 @@ while current_try<max_tries:
         for item in data:
             for prop in item.get('additionalProperties', []):
                 timestamps.append(prop['modified'])
-        max_modified_date = max(datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S.%fZ') for ts in timestamps)
-        datediff = (now-max_modified_date).days
-        if int(datediff) > 2:
-            errorvar = 'API has not been refreshed in over two days. No output will be provided :('
+        try:
+            max_modified_date = max(datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S.%fZ') for ts in timestamps)
+            datediff = (now-max_modified_date).days
+            if int(datediff) > 2:
+                errorvar = 'API has not been refreshed in over two days. No output will be provided :('
+        except:
+            print("Error in parsing dates to check for stale data")
+            print("Could not verify if API has the most recent data")
         filename = datetime.now().strftime("%Y-%m-%d__%H-%M-%S")
         filepath = 'data/'+filename+'.json'
         with open(filepath,'w') as file:
