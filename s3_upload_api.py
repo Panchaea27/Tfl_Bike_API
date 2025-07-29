@@ -23,6 +23,7 @@ def test_connection():
 def upload_files(directory:str):
     if test_connection():
         try:
+            #change it to iterate through files list and upload everything?
             to_upload_file = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory,f))][0]
             to_upload_path = f'{directory}/{to_upload_file}'
             print(f'File identified: {to_upload_file}')
