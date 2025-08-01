@@ -1,0 +1,43 @@
+id: bike_point_cow
+namespace: bike_point_api
+
+inputs:
+  - id: github_url
+    type: STRING
+    defaults: https://github.com/Panchaea27/Tfl_Bike_API
+
+tasks:
+  - id: wdir
+    type: io.kestra.plugin.core.flow.WorkingDirectory
+    tasks:
+      - id: clone
+        type: io.kestra.plugin.git.Clone
+        url: "{{ inputs.github_url}}"
+      - id: python_ingestion
+        type: "io.kestra.plugin.scripts.python.Commands"
+        namespaceFiles:
+          enabled: true
+        taskRunner:
+          type: io.kestra.plugin.scripts.runner.docker.Docker
+        containerImage: python:slim
+        warningOnStdErr: false
+        beforeCommands:
+          - pip install -r requirements.txt
+        commands:
+          - python output_json_api.py
+          - python s3_upload_api.py
+          # - python does_not_exist.py
+        env:
+          access_key: "{{ kv('access_key')}}"
+          secret_key: "{{ kv('secret_key')}}"
+          AWS_BUCKET_NAME: "{{ kv('AWS_BUCKET_NAME')}}"
+    retry:
+      type: constant
+      interval: PT5S
+      maxAttempt: 5
+      maxDuration: PT10M
+      warningOnRetry: true
+triggers:
+  - id: schedule
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "@hourly"

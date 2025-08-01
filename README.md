@@ -103,6 +103,41 @@ This workflow can be triggered manually (`workflow_dispatch`) or scheduled by un
 - No logging framework; output is via console prints.
 - Ensure your AWS credentials have proper permissions for STS and S3 upload actions.
 
+## Example: Orchestrating the TFL Bike Point Pipeline with Kestra
+
+Relates to the YAML **kestra_orchestration_example**
+
+The `bike_point_cow` flow, defined under the `bike_point_api` namespace, is a Kestra orchestration example designed to automate the retrieval and storage of data from the Transport for London (TFL) Bike Point API.
+
+This YAML defines a workflow that:
+
+- Clones a GitHub repository containing the project source code
+- Uses a Dockerized Python environment to install dependencies and run scripts
+- Executes two Python scripts in sequence:
+  - `output_json_api.py` — presumably fetches and structures data from the TFL API
+  - `s3_upload_api.py` — uploads the resulting output to an S3-compatible bucket
+- Retries the entire workflow on failure with backoff
+- Runs automatically every hour via a cron trigger
+
+### Security Notes
+
+The flow makes use of `kv()` for injecting credentials:
+
+- `access_key`, `secret_key`, and `AWS_BUCKET_NAME` are read from Kestra's Key Value store.
+
+**Important:** This method is acceptable for local or free-tier Kestra instances, but **must not be used in production** for managing sensitive information. Replace with proper secret management integrations in secure environments.
+
+### Customization Options
+
+You can modify this example to:
+
+- Add validation checks after each script execution
+- Split the ingestion and upload steps into separate tasks for better visibility
+- Implement conditional branching or data quality logic
+- Enable notification plugins for success/failure alerts
+
+This Kestra flow provides a lightweight, maintainable pattern for automating data collection and cloud storage tasks using Python.
+
 ---
 
 ## Security Considerations
